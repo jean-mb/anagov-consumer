@@ -12,9 +12,11 @@ def listar_rios(token: str):
     if response.status_code == 200:
         response_json = response.json()
         if len(response_json["items"]) != 0:
-            with open("output/rios.txt", "w") as file:
+            with open("output/rios/rios.txt", "w") as file:
                 for item in response_json["items"]:
                     file.write(f"{item['codigorio']} - {item['Nome_Rio']}\n")
+            with open("output/rios/rios.json", "w") as file:
+                file.write(response.text)
             return response.json()
         else:
             print(response_json["message"])
@@ -33,10 +35,10 @@ def listar_bacias(token: str):
     if response.status_code == 200:
         response_json = response.json()
         if len(response_json["items"]) != 0:
-            with open("output/bacias.txt", "w") as file:
+            with open("output/bacias/bacias.txt", "w") as file:
                 for item in response_json["items"]:
                     file.write(f"{item['codigobacia']} - {item['Nome_Bacia']}\n")
-            with open("output/bacias.json", "w") as file:
+            with open("output/bacias/bacias.json", "w") as file:
                 file.write(response.text)
             return response.json()
         else:
@@ -56,10 +58,10 @@ def listar_subbacias(token: str):
     if response.status_code == 200:
         response_json = response.json()
         if len(response_json["items"]) != 0:
-            with open("output/subbacias.txt", "w") as file:
+            with open("output/sub-bacias/sub-bacias.txt", "w") as file:
                 for item in response_json["items"]:
                     file.write(f"{item['codigosubbacia']} - {item['Sub_Bacia_Nome']}\n")
-            with open("output/subbacias.json", "w") as file:
+            with open("output/sub-bacias/sub-bacias.json", "w") as file:
                 file.write(response.text)
             return response.json()
         else:
