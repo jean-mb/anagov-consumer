@@ -17,6 +17,15 @@ def listar_rios(token: str):
                     file.write(f"{item['codigorio']} - {item['Nome_Rio']}\n")
             with open("output/rios/rios.json", "w") as file:
                 file.write(response.text)
+            with open("output/rios/rios.csv", "w") as file:
+                for key in response_json["items"][0].keys():
+                    file.write(f"{key},")
+                file.write("\n")
+                for rio in response_json["items"]:
+                    for valor in rio.values():
+                        valor = str(valor).replace(",", "-")  
+                        file.write(f"{valor},")
+                    file.write("\n")
             return response.json()
         else:
             print(response_json["message"])
@@ -40,6 +49,15 @@ def listar_bacias(token: str):
                     file.write(f"{item['codigobacia']} - {item['Nome_Bacia']}\n")
             with open("output/bacias/bacias.json", "w") as file:
                 file.write(response.text)
+            with open("output/bacias/bacias.csv", "w") as file:
+                for key in response_json["items"][0].keys():
+                    file.write(f"{key},")
+                file.write("\n")
+                for bacia in response_json["items"]:
+                    for valor in bacia.values():
+                        valor = str(valor).replace(",", "-")  
+                        file.write(f"{valor},")
+                    file.write("\n")
             return response.json()
         else:
             print(response_json["message"])
@@ -63,6 +81,15 @@ def listar_subbacias(token: str):
                     file.write(f"{item['codigosubbacia']} - {item['Sub_Bacia_Nome']}\n")
             with open("output/sub-bacias/sub-bacias.json", "w") as file:
                 file.write(response.text)
+            with open("output/sub-bacias/sub-bacias.csv", "w") as file:
+                for key in response_json["items"][0].keys():
+                    file.write(f"{key},")
+                file.write("\n")
+                for sub in response_json["items"]:
+                    for valor in sub.values():
+                        valor = str(valor).replace(",", "-")  
+                        file.write(f"{valor},")
+                    file.write("\n")
             return response.json()
         else:
             print(response_json["message"])

@@ -15,9 +15,9 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 def get_estacoes(token: str, filtros: tuple = None):
     base_url = "https://www.ana.gov.br/hidrowebservice/EstacoesTelemetricas/HidroInventarioEstacoes/v1"
     param_names = [
-        "Código da Estação",
+        "Código da Bacia",
         "Unidade Federativa",
-        "Código da Bacia"
+        "Código da Estação",
     ]
     params = {
         name: value for name, value in zip(param_names, filtros or ()) if value
@@ -43,9 +43,9 @@ def get_estacoes(token: str, filtros: tuple = None):
     return response
 
 def get_estacao_coords(estacao: dict):
-    items = estacao["items"][0]
-    print(f"\n{items['Latitude']} {items['Longitude']}\n")
-    url = f"https://www.google.com/maps/search/?api=1&query={items['Latitude']},{items['Longitude']}"
+    estacao
+    print(f"\n{estacao['Latitude']} {estacao['Longitude']}\n")
+    url = f"https://www.google.com/maps/search/?api=1&query={estacao['Latitude']},{estacao['Longitude']}"
     abrir_chrome(url)
 
 
@@ -59,6 +59,7 @@ def menu_listar_estacoes(token):
     filtros = (bacia, estado, codigo_estacao)
     print("=" * 40)
     print("\n")
+    print(filtros)
     return get_estacoes(token, filtros)
     
 def listar_estacoes(estacoes, estacoes_filtradas):
@@ -77,9 +78,17 @@ def listar_estacoes(estacoes, estacoes_filtradas):
     # print(estacoes)
     with open("output/estacoes/estacoes.txt", "w") as file:
         for estacao in items:
-            file.write(f"{estacao['codigoestacao']} - {estacao['Tipo_Estacao']} em {estacao['Municipio_Nome']}: {estacao['Estacao_Nome']}\n")
+            file.write(f"{estacao['codigoestacao']} - {estacao['Tipo_Estacao']} em {estacao['Municipio_Nome']}: {estacao['Estacao_Nome']} -> {estacao['Latitude']},{estacao['Longitude']}\n")
     with open("output/estacoes/estacoes.json", "w") as file:
         file.write(estacoes.text)
+    with open("output/estacoes/estacoes.csv", "w") as file:
+        for key in items[0].keys():
+            file.write(f"{key},")
+        file.write("\n")
+        for estacao in items:
+            for valor in estacao.values():
+                file.write(f"{valor},")
+            file.write("\n")
 
 def filtrar_estacoes(estacoes):
     estacoes_filtradas = []
@@ -153,7 +162,7 @@ def menu_acoes_estacoes(estacoes):
                 listar_estacoes(estacoes, estacoes_filtradas)
             case "3":
                 codigo_estacao = str(input("Digite o código da estação: "))
-                estacao = next((e for e in estacoes if e['codigoestacao'] == codigo_estacao), None)
+                estacao = next((e for e in estacoes_filtradas if e['codigoestacao'] == codigo_estacao), None)
                 if estacao:
                     get_estacao_coords(estacao)
                 else:
