@@ -7,8 +7,7 @@ load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 def plotar_estacoes(estacoes): 
-    estacoes_json = estacoes.json()
-    items = estacoes_json.get("items", [])
+    items = estacoes
     estacoes_filtradas = []
     for item in items:
         if item["Operando"] == "1":

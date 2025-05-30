@@ -61,9 +61,8 @@ def menu_listar_estacoes(token):
     print("\n")
     return get_estacoes(token, filtros)
     
-def listar_estacoes(estacoes):
-    estacoes_json = estacoes.json()
-    items = estacoes_json.get("items", [])
+def listar_estacoes(estacoes, estacoes_filtradas):
+    items = estacoes_filtradas
     if not estacoes:
         print("Nenhuma estação encontrada.")
         return
@@ -82,49 +81,101 @@ def listar_estacoes(estacoes):
     with open("output/estacoes/estacoes.json", "w") as file:
         file.write(estacoes.text)
 
-def menu_acoes_estacoes(estacoes):
-    limpar_terminal()
-    print("=" * 40)
-    print("Ações:")
-    print(
-        "1 - Gerar mapa com estações filtradas\n"
-        "2 - Listar todas as estações\n"
-        "3 - Ver coordenadas da estação específica\n"
-        "4 - Ver detalhes da estação específica\n"
-        "0 - Voltar\n"
-    )
-    print("=" * 40)
-    print("\n")
-    opcao = str(input("Digite a opção: "))
-    match opcao:
-        case "1":
-            plotar_estacoes(estacoes)
-        case "2":
-            listar_estacoes(estacoes)
-        case "3":
-            codigo_estacao = str(input("Digite o código da estação: "))
-            estacao = next((e for e in estacoes if e['codigoestacao'] == codigo_estacao), None)
-            if estacao:
-                get_estacao_coords(estacao)
+def filtrar_estacoes(estacoes):
+    estacoes_filtradas = []
+    filtros = {
+        1: ("codigobacia", None),
+        2: ("Tipo_Estacao", None),
+        3: ("Sub_Bacia_Nome", None),
+        4: ("Sub_Bacia_Codigo", None),
+        5: ("Rio_Nome", None),
+        6: ("Rio_Codigo", None),
+        7: ("Municipio_Nome", None),
+        8: ("Municipio_Codigo", None),
+        9: ("Bacia_Nome", None),
+        10: ("Operando", "1")
+    }   
+    print("Filtros disponíveis:")
+    for key, (field, _) in filtros.items():
+        print(f"{key} - {field.replace('_', ' ').title()}")
+    print("0 - Voltar")
+    while True:
+        valor = None
+        opcao = input("Escolha um filtro (ou 0 para voltar): ")
+        if opcao == "0":
+            return estacoes
+        if opcao == "2":
+            print("\nTipos de Estação:")
+            print("1 - Pluviométrica")
+            print("2 - Fluviométrica")
+            tipo_estacao = input("Digite o tipo de estação (ou deixe em branco para ignorar): ")
+            if tipo_estacao:
+                valor = "Pluviometrica" if tipo_estacao == "1" else "Fluviometrica" if tipo_estacao == "2" else None
             else:
-                print("Estação não encontrada.")
-        case "4":
-            codigo_estacao = str(input("Digite o código da estação: "))
-            estacao = next((e for e in estacoes if e['codigoestacao'] == codigo_estacao), None)
-            if estacao:
-                print(estacao)
+                print("Filtro ignorado.")
+        if opcao.isdigit() and int(opcao) in filtros:
+            field, _ = filtros[int(opcao)]
+            if valor is None:
+                valor = input(f"Digite o valor para {field.replace('_', ' ').title()} (ou deixe em branco para ignorar): ")
+            if valor:
+                for estacao in estacoes:
+                    if field in estacao and estacao[field] == valor:
+                        estacoes_filtradas.append(estacao)
+
+                return estacoes_filtradas
             else:
-                print("Estação não encontrada.")
-        case "0":
-            return
-        case _:
+                print("Filtro ignorado.")
+        else:
             print("Opção inválida, tente novamente.")
-            limpar_terminal()
-    # listar_estacoes(token, filtros)
+
+def menu_acoes_estacoes(estacoes):
+    estacoes_json = estacoes.json()
+    estacoes_filtradas = estacoes_json.get("items", [])
+    while True:
+        # limpar_terminal()
+        print("=" * 40)
+        print("Ações:")
+        print(
+            "1 - Gerar mapa com estações filtradas\n"
+            "2 - Listar todas as estações\n"
+            "3 - Ver coordenadas da estação específica\n"
+            "4 - Ver detalhes da estação específica\n"
+            "5 - Filtrar estações\n"
+            "0 - Voltar\n"
+        )
+        print("=" * 40)
+        print("\n")
+        opcao = str(input("Digite a opção: "))
+        match opcao:
+            case "1":
+                plotar_estacoes(estacoes_filtradas)
+            case "2":
+                listar_estacoes(estacoes, estacoes_filtradas)
+            case "3":
+                codigo_estacao = str(input("Digite o código da estação: "))
+                estacao = next((e for e in estacoes if e['codigoestacao'] == codigo_estacao), None)
+                if estacao:
+                    get_estacao_coords(estacao)
+                else:
+                    print("Estação não encontrada.")
+            case "4":
+                codigo_estacao = str(input("Digite o código da estação: "))
+                estacao = next((e for e in estacoes if e['codigoestacao'] == codigo_estacao), None)
+                if estacao:
+                    print(estacao)
+                else:
+                    print("Estação não encontrada.")
+            case "5":
+                estacoes_filtradas = filtrar_estacoes(estacoes_filtradas)
+            case "0":
+                return
+            case _:
+                print("Opção inválida, tente novamente.")
+                limpar_terminal()
+        # listar_estacoes(token, filtros)
 
 
 def menu_estacoes(token):
-    codigo_estacao = 0
     while True:
         # estacao = resultado["items"][0]
         print("=" * 40)
