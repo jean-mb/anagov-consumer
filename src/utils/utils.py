@@ -1,8 +1,8 @@
-import os
 import subprocess
 
 def limpar_terminal():
-    os.system('clear')
+    subprocess.run(['clear'])
+    
 
 def abrir_chrome(url: str):
     try:

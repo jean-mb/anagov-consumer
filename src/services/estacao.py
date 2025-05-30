@@ -1,5 +1,4 @@
 import requests
-from src.auth.token import auth
 from src.utils.utils import abrir_chrome, limpar_terminal
 
 
@@ -66,7 +65,6 @@ def menu_estacoes(token):
         match opcao:
             case "1":
                 get_estacao_coords(resultado)
-                break
             case "0":
                 break
             case _:
