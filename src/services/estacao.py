@@ -3,6 +3,7 @@ import requests
 from dotenv import load_dotenv
 from src.utils.utils import abrir_chrome, limpar_terminal
 import gmplot
+from bs4 import BeautifulSoup
 
 
 load_dotenv()
@@ -29,33 +30,54 @@ def listar_estacoes(token: str):
         return None
 
     # Filtra estações do rio 86001000
-    latitudes = []
-    longitudes = []
+    estacoes = []
     for item in items:
-        if item.get('Rio_Codigo') == "86001000":
+        if item.get('Municipio_Codigo') == "24157000" and item.get("Operando") == "1":
             try:
                 lat = float(item['Latitude'])
                 lng = float(item['Longitude'])
-                latitudes.append(lat)
-                longitudes.append(lng)
+                nome = item['codigoestacao']
+                estacoes.append((lat, lng, nome))
             except (ValueError, TypeError):
                 continue  # Ignora entradas inválidas
 
-    if not latitudes or not longitudes:
-        print("Nenhuma estação válida encontrada para o Rio 86001000.")
-        return None
+    gmap = gmplot.GoogleMapPlotter(estacoes[0][0], estacoes[0][1], 10, apikey=GOOGLE_API_KEY)
 
-    # Cria o mapa centrado na primeira coordenada
-    gmap = gmplot.GoogleMapPlotter(latitudes[0], longitudes[0], 10, apikey=GOOGLE_API_KEY)
-
-    # Adiciona os marcadores
-    gmap.scatter(latitudes, longitudes, color='red', size=40, marker=True)
-
-    # Salva o mapa em um arquivo HTML
-    mapa_path = "mapa_interativo.html"
+    for lat, lng, title in estacoes:
+        gmap.marker(lat, lng, title=title, color='red')
+        
+    mapa_path = "html/index.html"
     gmap.draw(mapa_path)
+    script_cru = '''
+    setTimeout(function() {
+        console.log('Mapa carregado');
+        document.querySelectorAll('div[role="img"]').forEach(function(div) {
+            div.addEventListener('click', function() {
+                const title = div.getAttribute('title') || 'Sem título';
+                navigator.clipboard.writeText(title).then(function() {
+                    alert('Código da estação copiado: ' + title);
+                }, function(err) {
+                    console.error('Erro ao copiar: ', err);
+                });
+            });
+        });
+    }, 5000);
+    '''
+    with open(mapa_path, 'r', encoding='utf-8') as file:
+        soup = BeautifulSoup(file, 'html.parser')
+
+    script_onclick = soup.new_tag('script', type='text/javascript')
+    script_onclick.string = script_cru
+
+    if soup.body:
+        soup.body.append(script_onclick)
+    else:
+        print("A tag <body> não foi encontrada no arquivo HTML.")
+
+    with open(mapa_path, 'w', encoding='utf-8') as file:
+        file.write(str(soup))
+
     print(f"Mapa gerado com sucesso: {mapa_path}")
-    abrir_chrome(f"file://{os.path.abspath(mapa_path)}")
     return response_json
 
 
