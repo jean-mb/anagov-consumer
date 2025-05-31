@@ -157,7 +157,7 @@ def menu_acoes_estacoes(estacoes):
         opcao = str(input("Digite a opção: "))
         match opcao:
             case "1":
-                plotar_estacoes(estacoes_filtradas)
+                plotar_estacoes(estacoes_filtradas, estacoes.json().get("items", []))
             case "2":
                 listar_estacoes(estacoes, estacoes_filtradas)
             case "3":
@@ -169,7 +169,7 @@ def menu_acoes_estacoes(estacoes):
                     print("Estação não encontrada.")
             case "4":
                 codigo_estacao = str(input("Digite o código da estação: "))
-                estacao = next((e for e in estacoes if e['codigoestacao'] == codigo_estacao), None)
+                estacao = next((e for e in estacoes_filtradas if e['codigoestacao'] == codigo_estacao), None)
                 if estacao:
                     print(estacao)
                 else:
