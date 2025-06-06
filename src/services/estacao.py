@@ -158,7 +158,11 @@ def menu_acoes_estacoes(estacoes):
         match opcao:
             case "1":
                 mostrar_todas = str(input("Deseja mostrar todas as estações? (s/n): ")).lower() == "s"
-                plotar_estacoes(estacoes_filtradas, estacoes.json().get("items", []), mostrar_todas)
+                raio=0
+                if mostrar_todas:
+                    raio = str(input("Digite o raio em km para buscar estações próximas (deixe em branco para não filtrar): "))
+                    raio = float(raio) if raio else 0
+                plotar_estacoes(estacoes_filtradas, estacoes.json().get("items", []), mostrar_todas, raio)
             case "2":
                 listar_estacoes(estacoes, estacoes_filtradas)
             case "3":
