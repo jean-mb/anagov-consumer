@@ -12,9 +12,12 @@ def listar_municipios(token: str):
     if response.status_code == 200:
         response_json = response.json()
         if len(response_json["items"]) != 0:
+
+
             with open("output/municipios/municipios.txt", "w") as file:
                 for item in response_json["items"]:
                     file.write(f"{item['codigomunicipio']} - {item['Municipio_Nome']} - Estado: {item['Estado_Codigo']}\n")
+            
             with open("output/municipios/municipios.json", "w") as file:
                 file.write(response.text)
 

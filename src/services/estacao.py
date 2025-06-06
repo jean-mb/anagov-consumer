@@ -128,7 +128,7 @@ def filtrar_estacoes(estacoes):
                 valor = input(f"Digite o valor para {field.replace('_', ' ').title()} (ou deixe em branco para ignorar): ")
             if valor:
                 for estacao in estacoes:
-                    if field in estacao and estacao[field] == valor:
+                    if field in estacao and valor in estacao[field]:
                         estacoes_filtradas.append(estacao)
 
                 return estacoes_filtradas
@@ -157,7 +157,8 @@ def menu_acoes_estacoes(estacoes):
         opcao = str(input("Digite a opção: "))
         match opcao:
             case "1":
-                plotar_estacoes(estacoes_filtradas, estacoes.json().get("items", []))
+                mostrar_todas = str(input("Deseja mostrar todas as estações? (s/n): ")).lower() == "s"
+                plotar_estacoes(estacoes_filtradas, estacoes.json().get("items", []), mostrar_todas)
             case "2":
                 listar_estacoes(estacoes, estacoes_filtradas)
             case "3":
@@ -172,6 +173,8 @@ def menu_acoes_estacoes(estacoes):
                 estacao = next((e for e in estacoes_filtradas if e['codigoestacao'] == codigo_estacao), None)
                 if estacao:
                     print(estacao)
+                    with open("output/estacoes/estacao_detalhes.json", "w") as file:
+                        file.write(str(estacao))
                 else:
                     print("Estação não encontrada.")
             case "5":

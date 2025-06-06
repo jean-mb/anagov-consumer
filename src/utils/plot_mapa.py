@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-def plotar_estacoes(estacoes_filtradas, estacoes_original): 
+def plotar_estacoes(estacoes_filtradas, estacoes_original, mostrar_todas=False): 
     items = estacoes_original
     ids_estacoes_filtradas = [item['codigoestacao'] for item in estacoes_filtradas]
     estacoes_plotagem = []
@@ -28,12 +28,12 @@ def plotar_estacoes(estacoes_filtradas, estacoes_original):
         if tipo == "Fluviometrica":
             if codigo in ids_estacoes_filtradas:
                 gmap.marker(lat, lng, title=codigo, label="", color='red')
-            else:
+            elif mostrar_todas:
                 gmap.marker(lat, lng, title=codigo, label="", color="pink") 
         elif tipo == "Pluviometrica":
             if codigo in ids_estacoes_filtradas:
                 gmap.marker(lat, lng, title=codigo,label="", color='blue')
-            else:
+            elif mostrar_todas:
                 gmap.marker(lat, lng, title=codigo,label="", color="azure") 
     mapa_path = "html/index.html"
     gmap.draw(mapa_path)
