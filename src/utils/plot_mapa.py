@@ -4,6 +4,9 @@ from shapely.geometry import Point
 import branca.colormap as cm # Importa a biblioteca para o mapa de cores
 
 def plotar_estacoes(estacoes_filtradas, estacoes_original, mostrar_todas=False, raio_km=0, output_path="html/index.html"):
+    mostrar_pluviometricas = str(input("Deseja mostrar estações pluviométricas? (s/n): ")).lower() == "s"
+    mostrar_altitude = str(input("Deseja mostrar a altitude das estações fluviométricas? (s/n): ")).lower() == "s"
+    
     if not estacoes_filtradas:
         print("A lista de estações filtradas está vazia. O mapa não pode ser gerado.")
         return
@@ -61,20 +64,23 @@ def plotar_estacoes(estacoes_filtradas, estacoes_original, mostrar_todas=False, 
     
     camada_filtradas_tipo = folium.FeatureGroup(name="Estações Filtradas (por Tipo)", show=True)
     for _, row in gdf_filtradas.iterrows():
+        if not mostrar_pluviometricas and row['tipo'] == 'Pluviometrica':
+            continue
         cor = 'red' if row['tipo'] == 'Fluviometrica' else 'blue'
+        icon = 'tint' if row['tipo'] == 'Pluviometrica' else 'fa-filter'
         popup_html = f"<b>Estação:</b> {row['codigo']}<br><b>Tipo:</b> {row['tipo']}"
         folium.Marker(
             location=[row['latitude'], row['longitude']],
             popup=folium.Popup(popup_html, max_width=200),
             tooltip=f"{row['codigo']} ({row['tipo']})",
-            icon=folium.Icon(color=cor, icon='star', prefix='fa')
+            icon=folium.Icon(color=cor, icon=icon, prefix='fa')
         ).add_to(camada_filtradas_tipo)
     camada_filtradas_tipo.add_to(m)
 
     camada_altitude_fluv = folium.FeatureGroup(name="Altitude (Fluviométricas)", show=False) # Começa desligada
     
     gdf_fluv = gdf_filtradas[gdf_filtradas['tipo'] == 'Fluviometrica']
-    if not gdf_fluv.empty:
+    if not gdf_fluv.empty and mostrar_altitude:
         min_alt, max_alt = gdf_fluv['altitude'].min(), gdf_fluv['altitude'].max()
         
         if min_alt == max_alt:
@@ -102,13 +108,17 @@ def plotar_estacoes(estacoes_filtradas, estacoes_original, mostrar_todas=False, 
 
     camada_proximas = folium.FeatureGroup(name=f"Estações no Raio de {raio_km} km", show=mostrar_todas)
     for _, row in gdf_proximas.iterrows():
+        if not mostrar_pluviometricas and row['tipo'] == 'Pluviometrica':
+            continue
         cor = 'pink' if row['tipo'] == 'Fluviometrica' else 'lightblue'
+        icon = 'tint' if row['tipo'] == 'Pluviometrica' else 'fa-filter'
+
         popup_html = f"<b>Estação (Próxima):</b> {row['codigo']}<br><b>Tipo:</b> {row['tipo']}"
         folium.Marker(
             location=[row['latitude'], row['longitude']],
             popup=folium.Popup(popup_html, max_width=200),
             tooltip=f"Estação: {row['codigo']}",
-            icon=folium.Icon(color=cor, icon='info-sign')
+            icon=folium.Icon(color=cor, icon=icon, prefix='fa')
         ).add_to(camada_proximas)
     camada_proximas.add_to(m)
     

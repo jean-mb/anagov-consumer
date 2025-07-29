@@ -80,7 +80,7 @@ def listar_estacoes(estacoes, estacoes_filtradas):
         for estacao in items:
             file.write(f"{estacao['codigoestacao']} - {estacao['Tipo_Estacao']} em {estacao['Municipio_Nome']}: {estacao['Estacao_Nome']} -> {estacao['Latitude']},{estacao['Longitude']}\n")
     with open("output/estacoes/estacoes.json", "w") as file:
-        file.write(estacoes.text)
+        file.write(str(items))
     with open("output/estacoes/estacoes.csv", "w") as file:
         for key in items[0].keys():
             file.write(f"{key},")
@@ -125,7 +125,7 @@ def filtrar_estacoes(estacoes):
         if opcao.isdigit() and int(opcao) in filtros:
             field, _ = filtros[int(opcao)]
             if valor is None:
-                valor = input(f"Digite o valor para {field.replace('_', ' ').title()} (ou deixe em branco para ignorar): ")
+                valor = str(input(f"Digite o valor para {field.replace('_', ' ').title()} (ou deixe em branco para ignorar): "))
             if valor:
                 for estacao in estacoes:
                     if field in estacao and valor in estacao[field]:
@@ -137,6 +137,28 @@ def filtrar_estacoes(estacoes):
         else:
             print("Opção inválida, tente novamente.")
 
+def selecionar_estacoes(estacoes):
+    estacoes_filtradas = []
+    print("Selecione as estações que deseja incluir (separadas por vírgula):")
+    for estacao in estacoes:
+        print(f"{estacao['codigoestacao']} - {estacao['Tipo_Estacao']} em {estacao['Municipio_Nome']}: {estacao['Estacao_Nome']}") 
+    selecionadas = input("\nDigite os códigos das estações: ").split(",")
+    for estacao in estacoes:
+        if estacao['codigoestacao'] in selecionadas:
+            estacoes_filtradas.append(estacao)
+    if not estacoes_filtradas:
+        print("Nenhuma estação selecionada.")
+
+    with open("output/estacoes/estacoes_selecionadas.csv", "w") as file:
+        for key in estacoes_filtradas[0].keys():
+            file.write(f"{key},")
+        file.write("\n")
+        for estacao in estacoes_filtradas:
+            for valor in estacao.values():
+                file.write(f"{valor},")
+            file.write("\n")
+    return estacoes_filtradas
+    
 def menu_acoes_estacoes(estacoes):
     estacoes_json = estacoes.json()
     estacoes_filtradas = estacoes_json.get("items", [])
@@ -150,6 +172,7 @@ def menu_acoes_estacoes(estacoes):
             "3 - Ver coordenadas da estação específica\n"
             "4 - Ver detalhes da estação específica\n"
             "5 - Filtrar estações\n"
+            "6 - Selecionar estações\n"
             "0 - Voltar\n"
         )
         print("=" * 40)
@@ -176,13 +199,16 @@ def menu_acoes_estacoes(estacoes):
                 codigo_estacao = str(input("Digite o código da estação: "))
                 estacao = next((e for e in estacoes_filtradas if e['codigoestacao'] == codigo_estacao), None)
                 if estacao:
-                    print(estacao)
+                    for key, value in estacao.items():
+                        print(f"{key}: {value}")
                     with open("output/estacoes/estacao_detalhes.json", "w") as file:
                         file.write(str(estacao))
                 else:
                     print("Estação não encontrada.")
             case "5":
-                estacoes_filtradas = filtrar_estacoes(estacoes_filtradas)
+                estacoes_filtradas = filtrar_estacoes(estacoes_json.get("items", []))
+            case "6":
+                estacoes_filtradas = selecionar_estacoes(estacoes_filtradas)
             case "0":
                 return
             case _:
